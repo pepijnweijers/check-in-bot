@@ -47,6 +47,12 @@ function Popup() {
             const projectId = projectIdMatch ? projectIdMatch[1] : null;
             setProject(Number(projectId))
             await storage.set("project", projectId)
+            setEvaluation( 
+                await useEvaluationCheck(Number(projectId)) 
+            )
+            if (!evaluation.checkedIn) {
+                browser.tabs.create({ url: `https://student.themarkers.nl/hu:open-ict/projects/${projectId}/create-evidence/14` });
+            }
         } else {
             browser.tabs.create({
                 url: 'https://student.themarkers.nl'
@@ -71,7 +77,8 @@ function Popup() {
             <MessageBox />
             <h1 className="font-bold text-2xl text-gray-50">Check-ins Bot</h1>
             <p className='mt-2 mb-3'>Mis nooit meer een check-in met deze automatisch check-in bot!</p>
-            {evaluation.count >= 0 ?
+            {project >= 0 && (
+                evaluation.count >= 0 ?
                 <div className='grid grid-cols-2 gap-2 mb-3'>
                     <div className='bg-white/10 px-5 py-4 rounded-lg'>
                         <span className='text-sm'>Totaal:</span>
@@ -92,6 +99,7 @@ function Popup() {
                 <div className='mb-3 py-5 text-center'>
                     <IconLoader2 className='animate-spin mx-auto' />
                 </div>
+                )
             }
 
             {project ?

@@ -26,6 +26,9 @@ out/
 build/
 dist/
 
+# Ignore env files
+.env*
+
 # plasmo
 .plasmo
 

@@ -1,12 +1,41 @@
 import useEvaluationCheck from "~app/libs/useEvaluationCheck";
 import { Storage } from "@plasmohq/storage";
+import browser from 'webextension-polyfill';
+
+const now = new Date();
 
 const isWorkday = (date: Date): boolean => {
-    const day = date.getDay(); // 0 = Sunday, 6 = Saturday
-    return day >= 1 && day <= 5; // Workdays are Monday (1) through Friday (5)
+    const day = date.getDay();
+    return day >= 1 && day <= 5;
 };
 
+const getTimeToEleven = (): number => {
+    const nextRun = new Date();
+    nextRun.setHours(11, 0, 0, 0);
+
+    while (!isWorkday(nextRun) || now >= nextRun) {
+        nextRun.setDate(nextRun.getDate() + 1);
+        nextRun.setHours(11, 0, 0, 0);
+    }
+    const delay = nextRun.getTime() - now.getTime();
+    const alarmTime = delay / 1000; 
+
+    return alarmTime;
+}
+
+const scheduleTask = () => {
+    console.log(`Scheduled to run at: ${Date.now() + getTimeToEleven() * 1000}`);
+    if (browser.alarms) {
+        browser.alarms.create('taskAlarm', {
+            when: Date.now() + getTimeToEleven() * 1000,
+        });
+    } else {
+        console.error("browser.alarms is undefined. Check your permissions in manifest.json.");
+    }
+}
+
 const runTask = async () => {
+    console.log('Running!!!');
     const storage = new Storage();
 
     try {
@@ -21,49 +50,24 @@ const runTask = async () => {
         console.log("CheckedIn status:", evaluation.checkedIn);
 
         if (!evaluation.checkedIn) {
-            // Open a new tab to the desired URL
-            chrome.tabs.create({ url: `https://student.themarkers.nl/hu:open-ict/projects/${fetchedProject}/create-evidence/14` });
+            browser.tabs.create({ url: `https://student.themarkers.nl/hu:open-ict/projects/${fetchedProject}/create-evidence/14` });
         }
     } catch (error) {
         console.error("Error during evaluation check:", error);
     }
 };
 
-const scheduleTask = () => {
-    const now = new Date();
-    const nextRun = new Date();
-
-    nextRun.setHours(11, 0, 0, 0);
-
-    while (!isWorkday(nextRun) || now >= nextRun) {
-        nextRun.setDate(nextRun.getDate() + 1); 
-        nextRun.setHours(11, 0, 0, 0);
-    }
-
-    const delay = nextRun.getTime() - now.getTime();
-
-    console.log(`Scheduled to run at: ${nextRun.toLocaleString()}`);
-
-    setTimeout(() => {
-        console.log("Loading...");
-        runTask(); 
-        scheduleTask();
-    }, delay);
-};
-
-const checkImmediateRun = () => {
-    const now = new Date();
-    if (now.getHours() >= 11 && now.getMinutes() >= 0) {
-        console.log("It's past 11:00 AM, running task immediately.");
+const onAlarm = (alarm: browser.Alarms.Alarm) => {
+    if (alarm.name === 'taskAlarm') {
+        console.log("Running task due to alarm...");
         runTask();
+        scheduleTask();
     }
 };
 
-const load = () => {
-    if (isWorkday(new Date())) {
-        checkImmediateRun();
-    }
-    scheduleTask(); 
-};
-
-load();
+if (now.getHours() >= 11 && now.getMinutes() >= 0 && isWorkday(now)) {
+    console.log("It's past 11:00 AM, running task immediately.");
+    runTask();
+} 
+scheduleTask();
+browser.alarms.onAlarm.addListener(onAlarm);

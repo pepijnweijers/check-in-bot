@@ -1,7 +1,7 @@
 {
   "name": "check-ins-bot",
   "displayName": "Check ins bot",
-  "version": "0.1",
+  "version": "0.2",
   "description": "Vergeet nooit meer een checkin",
   "author": "Pepijn Weijers (pepijn@weijers.one)",
   "scripts": {
@@ -36,7 +36,8 @@
       "https://*/*"
     ],
     "permissions": [
-      "activeTab"
+      "activeTab",
+      "alarms"
     ],
     "browser_specific_settings": {
       "gecko": {
