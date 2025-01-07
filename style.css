@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html,body{
+        @apply bg-gray-800 text-gray-300 w-[275px] text-base;
+    }
+    body > * {
+        @apply p-5;
+    }
+    .button{
+        @apply px-4 py-3 rounded-md font-medium text-slate-50 duration-300;
+    }
+    .button:disabled{
+        @apply opacity-50 pointer-events-none;
+    }
+    .button.button-primary{
+        @apply bg-blue-800 hover:bg-blue-700;
+    }
+    .button.button-secondary{
+        @apply bg-gray-600 hover:bg-gray-500;
+    }
+    .button.button-danger{
+        @apply bg-red-800 hover:bg-red-700;
+    }
+}
