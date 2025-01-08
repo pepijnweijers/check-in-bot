@@ -1,7 +1,7 @@
 {
   "name": "check-ins-bot",
   "displayName": "Check ins bot",
-  "version": "0.2",
+  "version": "0.3",
   "description": "Vergeet nooit meer een checkin",
   "author": "Pepijn Weijers (pepijn@weijers.one)",
   "scripts": {
@@ -41,7 +41,8 @@
     ],
     "browser_specific_settings": {
       "gecko": {
-        "id": "pepijn@weijers.one"
+        "id": "pepijn@weijers.one",
+        "update_url": "https://raw.githubusercontent.com/pepijnweijers/check-in-bot/refs/heads/main/updates.json"
       }
     }
   }

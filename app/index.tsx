@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IconArrowUpRight, IconCheck, IconLoader2, IconTrash, IconX } from '@tabler/icons-react';
 import browser from 'webextension-polyfill';
 import { useRecoilState } from 'recoil';
@@ -13,12 +13,12 @@ function Popup() {
     const [project, setProject] = useRecoilState(projectState);
     const [message, setMessage] = useRecoilState(messageState);
     const [evaluation, setEvaluation] = useRecoilState(evaluationsState);
+    const [nextRun, setNextRun] = useState('');
     const projectUrl = `https://student.themarkers.nl/hu:open-ict/projects/${project}`;
 
     useEffect(() => {
         const load = async () => {
             const fetchedProject = await storage.get("project");
-            console.log(Number(fetchedProject))
             setProject(await storage.get("project"));
             
             browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
@@ -29,6 +29,11 @@ function Popup() {
                 console.error('Error fetching tab URL:', error);
             });
             if(fetchedProject){
+                const NextRun = await browser.alarms.get('taskAlarm');
+                const readableDate = new Date(NextRun.scheduledTime);
+                const formattedDate = readableDate.toLocaleString();
+                setNextRun(formattedDate);
+
                 setEvaluation( 
                     await useEvaluationCheck(Number(fetchedProject)) 
                 )
@@ -103,22 +108,27 @@ function Popup() {
             }
 
             {project ?
-                <div className='flex gap-x-2'>
-                    <a 
-                        href={projectUrl} 
-                        target='_blank' 
-                        className='button button-secondary w-full flex items-center justify-center'
-                    >
-                        Bekijk collectie
-                        <IconArrowUpRight />
-                    </a>
-                    <button 
-                        onClick={Disconnect} 
-                        disabled={!url.includes(projectUrl)}
-                        className='button button-danger'
-                    >
-                        <IconTrash />
-                    </button>
+                <div>
+                    <div className='flex gap-x-2'>
+                        <a 
+                            href={projectUrl} 
+                            target='_blank' 
+                            className='button button-secondary w-full flex items-center justify-center'
+                        >
+                            Bekijk collectie
+                            <IconArrowUpRight />
+                        </a>
+                        <button 
+                            onClick={Disconnect} 
+                            disabled={!url.includes(projectUrl)}
+                            className='button button-danger'
+                        >
+                            <IconTrash />
+                        </button>
+                    </div>
+                    <span className='block text-xs mt-4 text-slate-300'>
+                        Next run: {nextRun}
+                    </span>
                 </div>
                 :
                 <button onClick={Connect} className='button button-primary w-full'>
