@@ -65,9 +65,24 @@ const onAlarm = (alarm: browser.Alarms.Alarm) => {
     }
 };
 
+browser.runtime.onStartup.addListener(() => {
+    console.log("Browser started. Rescheduling task...");
+    scheduleTask();
+});
+
+browser.runtime.onInstalled.addListener(() => {
+    console.log("Extension installed or updated. Rescheduling task...");
+    scheduleTask();
+});
+browser.idle.onStateChanged.addListener((state) => {
+    if (state === "active") {
+        console.log("System became active. Rescheduling task...");
+        scheduleTask();
+    }
+});
 if (now.getHours() >= 11 && now.getMinutes() >= 0 && isWorkday(now)) {
     console.log("It's past 11:00 AM, running task immediately.");
     runTask();
-} 
+}
 scheduleTask();
 browser.alarms.onAlarm.addListener(onAlarm);
