@@ -13,6 +13,10 @@
                 {
                     "version": "0.4",
                     "update_link": "https://github.com/pepijnweijers/check-in-bot/raw/refs/heads/main/download/1abeee1c411e4884a1ff-0.4.xpi"
+                },
+                {
+                    "version": "0.5",
+                    "update_link": "https://github.com/pepijnweijers/check-in-bot/raw/refs/heads/main/download/1abeee1c411e4884a1ff-0.5.xpi"
                 }
             ]
         }
