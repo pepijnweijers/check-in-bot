@@ -24,6 +24,11 @@ const getTimeToEleven = (): number => {
 }
 
 const scheduleTask = () => {
+    if (now.getHours() >= 11 && now.getMinutes() >= 0 && isWorkday(now)) {
+        console.log("It's past 11:00 AM, running task immediately.");
+        runTask();
+    }
+
     console.log(`Scheduled to run at: ${Date.now() + getTimeToEleven() * 1000}`);
     if (browser.alarms) {
         browser.alarms.create('taskAlarm', {
@@ -35,7 +40,6 @@ const scheduleTask = () => {
 }
 
 const runTask = async () => {
-    console.log('Running!!!');
     const storage = new Storage();
 
     try {
@@ -50,7 +54,25 @@ const runTask = async () => {
         console.log("CheckedIn status:", evaluation.checkedIn);
 
         if (!evaluation.checkedIn) {
-            browser.tabs.create({ url: `https://student.themarkers.nl/hu:open-ict/projects/${fetchedProject}/create-evidence/14` });
+            browser.notifications.create('open-link', {
+                type: 'basic',
+                iconUrl: 'icon.png',
+                title: 'Task Reminder',
+                message: 'Click here to open your task.',
+            }).then(() => {
+                console.log('Notification created.');
+            });
+            
+            browser.notifications.onClosed.addListener((notificationId) => {
+                if (notificationId === 'open-link') {
+                    browser.tabs.create({ url: `https://student.themarkers.nl/hu:open-ict/projects/${fetchedProject}/create-evidence/14` });
+                }
+            });
+            browser.notifications.onClicked.addListener((notificationId) => {
+                if (notificationId === 'open-link') {
+                    browser.tabs.create({ url: `https://student.themarkers.nl/hu:open-ict/projects/${fetchedProject}/create-evidence/14` });
+                }
+            });
         }
     } catch (error) {
         console.error("Error during evaluation check:", error);
@@ -80,9 +102,5 @@ browser.idle.onStateChanged.addListener((state) => {
         scheduleTask();
     }
 });
-if (now.getHours() >= 11 && now.getMinutes() >= 0 && isWorkday(now)) {
-    console.log("It's past 11:00 AM, running task immediately.");
-    runTask();
-}
 scheduleTask();
 browser.alarms.onAlarm.addListener(onAlarm);
