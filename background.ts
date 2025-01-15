@@ -6,22 +6,28 @@ const now = new Date();
 
 const isWorkday = (date: Date): boolean => {
     const day = date.getDay();
-    return day >= 1 && day <= 5;
+    return day >= 1 && day <= 5; 
 };
 
 const getTimeToEleven = (): number => {
-    const nextRun = new Date();
+    let nextRun = new Date();
     nextRun.setHours(11, 0, 0, 0);
 
     while (!isWorkday(nextRun) || now >= nextRun) {
+        nextRun.setDate(nextRun.getDate() + 1); 
+        nextRun.setHours(11, 0, 0, 0);
+    }
+
+    while (nextRun.getHours() !== 11 || nextRun.getMinutes() !== 0 || nextRun.getSeconds() !== 0 || !isWorkday(nextRun)) {
+        console.warn("Verification failed, retrying...");
         nextRun.setDate(nextRun.getDate() + 1);
         nextRun.setHours(11, 0, 0, 0);
     }
-    const delay = nextRun.getTime() - now.getTime();
-    const alarmTime = delay / 1000; 
 
-    return alarmTime;
-}
+    const delay = nextRun.getTime() - now.getTime();
+
+    return delay / 1000;
+};
 
 const scheduleTask = () => {
     if (now.getHours() >= 11 && now.getMinutes() >= 0 && isWorkday(now)) {
@@ -36,6 +42,22 @@ const scheduleTask = () => {
         });
     } else {
         console.error("browser.alarms is undefined. Check your permissions in manifest.json.");
+    }
+}
+
+const OpenProject = async () => {
+    const storage = new Storage();
+    const fetchedProject = await storage.get("project");
+    
+    if (!fetchedProject) {
+        console.error("No project found in storage.");
+        return;
+    }
+    
+    const evaluation = await useEvaluationCheck(Number(fetchedProject));
+
+    if (!evaluation.checkedIn) {
+        browser.tabs.create({ url: `https://student.themarkers.nl/hu:open-ict/projects/${fetchedProject}/create-evidence/14` });
     }
 }
 
@@ -56,21 +78,21 @@ const runTask = async () => {
         if (!evaluation.checkedIn) {
             browser.notifications.create('open-link', {
                 type: 'basic',
-                iconUrl: 'icon.png',
-                title: 'Task Reminder',
-                message: 'Click here to open your task.',
+                iconUrl: '/assets/logo.png',
+                title: 'Check-in Reminder',
+                message: 'Click here to open your check-in.',
             }).then(() => {
                 console.log('Notification created.');
             });
             
             browser.notifications.onClosed.addListener((notificationId) => {
                 if (notificationId === 'open-link') {
-                    browser.tabs.create({ url: `https://student.themarkers.nl/hu:open-ict/projects/${fetchedProject}/create-evidence/14` });
+                    OpenProject();
                 }
             });
             browser.notifications.onClicked.addListener((notificationId) => {
                 if (notificationId === 'open-link') {
-                    browser.tabs.create({ url: `https://student.themarkers.nl/hu:open-ict/projects/${fetchedProject}/create-evidence/14` });
+                    OpenProject();
                 }
             });
         }
