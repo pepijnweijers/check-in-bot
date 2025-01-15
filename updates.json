@@ -25,6 +25,10 @@
                 {
                     "version": "0.7",
                     "update_link": "https://github.com/pepijnweijers/check-in-bot/raw/refs/heads/main/download/1abeee1c411e4884a1ff-0.7.xpi"
+                },
+                {
+                    "version": "0.7.1",
+                    "update_link": "https://github.com/pepijnweijers/check-in-bot/raw/refs/heads/main/download/1abeee1c411e4884a1ff-0.7.1.xpi"
                 }
             ]
         }
