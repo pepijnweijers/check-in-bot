@@ -10,38 +10,37 @@ const isWorkday = (date: Date): boolean => {
 };
 
 const getTimeToEleven = (): number => {
+    const now = new Date(); // Moved inside to get current time
     let nextRun = new Date();
     nextRun.setHours(11, 0, 0, 0);
 
+    // Ensure it's in the future and a working day
     while (!isWorkday(nextRun) || now >= nextRun) {
-        nextRun.setDate(nextRun.getDate() + 1); 
-        nextRun.setHours(11, 0, 0, 0);
-    }
-
-    while (nextRun.getHours() !== 11 || nextRun.getMinutes() !== 0 || nextRun.getSeconds() !== 0 || !isWorkday(nextRun)) {
-        console.warn("Verification failed, retrying...");
         nextRun.setDate(nextRun.getDate() + 1);
         nextRun.setHours(11, 0, 0, 0);
     }
 
     const delay = nextRun.getTime() - now.getTime();
-
-    return delay / 1000;
+    return delay / 1000; // Return delay in seconds
 };
 
 const scheduleTask = () => {
+    const delay = getTimeToEleven() * 1000;
+    const nextRunTime = Date.now() + delay;
+    
     if (now.getHours() >= 11 && now.getMinutes() >= 0 && isWorkday(now)) {
         console.log("It's past 11:00 AM, running task immediately.");
         runTask();
     }
 
-    console.log(`Scheduled to run at: ${Date.now() + getTimeToEleven() * 1000}`);
+    console.log(`Scheduled to run at: ${new Date(nextRunTime).toISOString()}`);
+    
     if (browser.alarms) {
         browser.alarms.create('taskAlarm', {
-            when: Date.now() + getTimeToEleven() * 1000,
+            when: nextRunTime,
         });
     } else {
-        console.error("browser.alarms is undefined. Check your permissions in manifest.json.");
+        console.error("browser.alarms is undefined. Check permissions in manifest.json.");
     }
 }
 
