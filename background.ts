@@ -103,7 +103,6 @@ const runTask = async () => {
 const onAlarm = (alarm: browser.Alarms.Alarm) => {
     if (alarm.name === 'taskAlarm') {
         console.log("Running task due to alarm...");
-        runTask();
         scheduleTask();
     }
 };
